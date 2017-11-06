@@ -1,0 +1,146 @@
+---
+title: "Data Analytics: Lab Week 1"
+author: "Kat Bardash, 10.27.17"
+output: 
+  html_document:
+    keep_md: true
+---
+####Note: Most exercises were done in 2 different ways, one using data.table, the other with either native R packages or with dplyr.
+>
+#### First I Will Load in Libraries
+```{r}
+library(data.table)
+library(dplyr)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+```
+> 
+### Load Directly From a URL
+
+>
+## a. Read the csv file from the URL. Paste the command here.
+```{r, cache=TRUE}
+#data.table way of reading - allows urls
+
+data <- fread("https://www.unsw.adfa.edu.au/australian-centre-for-cyber-security/cybersecurity/ADFA-NB15-Datasets/a%20part%20of%20training%20and%20testing%20set/UNSW_NB15_training-set.csv")
+
+#native R
+
+#data <- as.data.table(read.csv(url("https://www.unsw.adfa.edu.au/australian-centre-for-cyber-security/cybersecurity/ADFA-NB15-Datasets/a%20part%20of%20training%20and%20testing%20set/UNSW_NB15_training-set.csv")))
+
+
+
+```
+
+>
+##b. Paste the internal structure of your object. 
+
+```{r}
+head(data)
+str(data)
+summary(data)
+
+```
+
+>
+##2.a How many tcp, udp, sctp, and arp packets are there in the data set? 
+##b. Count occurances of all 131 unique members of this field.
+
+```{r}
+#data.table method to get list of counts of all packet types
+data2 <- as.data.table(data)
+
+npak <- data2[, .('Number of Rows' =.N), by=proto]
+npak
+
+#to see all 132 rows
+# print(npak, nrow=132)
+
+# data.table get specific packets
+npakS <- data2[proto=="tcp" | proto=="udp" | proto=="sctp" | proto=="arp" , .('Number of Rows' =.N), by=proto]
+npakS
+
+# using %in% to get ALL data within those packets
+npakS <- subset(data2, proto %in% c('tcp', "udp", "sctp", "arp"))
+npakS
+
+
+# dplyr method
+data_df <- as.data.frame(data)
+data %>% filter(proto=="tcp" | proto=="udp" | proto=="sctp" | proto=="arp") %>% group_by(proto) %>% summarise(n=n())
+
+
+```
+
+>##3. What is the mean packet size by protocol? Use the spkts variable. Only provide the first five from your console output.
+
+```{r}
+
+#data.table method
+datMean <- data2[, .(mean=mean(spkts)), by=proto]
+
+datMean[1:5,]
+
+
+#data.table method, using lapply
+data2[, lapply(.SD, mean), by=proto, .SDcols=c("spkts")]
+
+
+# dplyr method
+mean_dt <- data %>% group_by(proto) %>% summarize(m=mean(spkts))
+head(mean_dt, n=5)
+
+
+```
+
+>
+##4 Five protocols with the greatest mean packet size - descending order 
+
+```{r}
+#data.table method
+setorder(datMean, -mean)
+datMean[1:5,]
+
+
+#dplyr method
+sorted <- arrange(mean_dt, desc(m))
+sorted[1:5,]
+
+```
+
+>
+## 5 Create a .txt or .csv with provided data and use read.csv(() or read.table to read your file into an object called "my_data". 
+
+```{r}
+data5<- read.table("./my_data.txt", sep=",", header=FALSE, nrow=3)
+head(data5)
+```
+
+>
+## b &c. Write an apply() function to calculate sums by row, then by colum
+```{r}
+#by row
+apply(data5, 1, mean)
+
+#by column
+apply(data5, 2, mean)
+
+```
+
+>
+## d. Write an apply function to calculate sums by row and column. **** Did not *****Use margin=c(1,2)*****
+```{r}
+
+rowSum <- apply(data5, 1, sum)
+colSum <- apply(data5, 2, mean)
+
+print(rbind(cbind(data5, Rtot=rowSum), Ctot=c(colSum, sum(colSum))))
+
+#  adding 1 to each  ## you need c(1,2) for the WHOLE matrix
+apply(data5, c(1,2), function(x) x+1)
+
+
+
+```

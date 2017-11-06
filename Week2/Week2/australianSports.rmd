@@ -1,0 +1,97 @@
+---
+title: "Austraian Sports"
+author: "kat"
+date: "November 2, 2017"
+output: 
+  html_document:
+    keep_md: true
+---
+
+```{r}
+library(DAAG)
+library(ggplot2)
+library(dplyr)
+
+data(ais)
+
+#red blood cell count, in <i></i></p>
+
+#bmi - Body Mass Index
+#pcBfat - Percenty Body fat
+#lbm - Lean Body Mass
+#ht - height
+#wt - weight
+#sex - sex
+#sport - sport 
+
+ais <- as.data.frame(ais)
+summary(ais)
+
+```
+>
+## What is the average height of an athlete by female/male?
+```{r}
+
+ais %>% group_by(sex) %>% summarize(m=mean(ht))
+```
+
+>
+## What is the umber of people by sport & sex
+```{r}
+ais %>% count(sport, sex, sort=TRUE)
+
+```
+>
+## Does Height, Weight, BMI, & % of Body Fat differ per Sport & Sex?
+```{r}
+fmsport <- ais %>% group_by(sport, sex) %>% summarize(mht=mean(ht), mwt=mean(wt), mbmi=mean(bmi), mpcBfat=mean(pcBfat))
+g <- ggplot(fmsport, aes(x=sport, y=mht, color=sex)) +
+  geom_point(lwd=5) +
+  xlab("Sport") +
+  ylab("Mean Height in cm")
+g
+
+
+h <- ggplot(fmsport, aes(x=sport, y=mwt, color=sex)) +
+  geom_point(lwd=5) +
+  xlab("Sport") +
+  ylab("Mean Weight in KG")
+h
+
+m <- ggplot(fmsport, aes(x=sport, y=mbmi, color=sex)) +
+  geom_point(lwd=5) +
+  xlab("Sport") +
+  ylab("Mean BMI")
+m
+
+t <- ggplot(fmsport, aes(x=sport, y=mpcBfat, color=sex)) +
+  geom_point(lwd=5) +
+  xlab("Sport") +
+  ylab("Mean Body Fat %")
+t
+```
+
+>
+## What else can I find out from Body Fat % by sex?
+# don't know how to get m/f to show up on the plot also??!!!
+# check out this website
+#https://stats.stackexchange.com/questions/11406/boxplot-with-respect-to-two-factors-using-ggplot2-in-r
+```{r}
+
+  ggplot(ais, aes(x=sport, y=pcBfat, fill=sex))+
+  geom_boxplot(position="identity", alpha=0.5)+
+  xlab("sport")+
+  ylab("Percent of Body Fat")
+s
+
+```
+
+>
+## How is percentage of body fat distributed by Sex?
+```{r}
+ggplot(ais, aes(x=pcBfat, y=..density..))+
+  geom_histogram(fill="yellow", colour="blue", bins=40)+
+  facet_grid(sex~.)+
+  geom_density()
+
+```
