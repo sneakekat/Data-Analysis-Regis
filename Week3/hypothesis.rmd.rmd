@@ -1,0 +1,98 @@
+---
+title: "Testing For Normality"
+author: "kat"
+date: "November 9, 2017"
+output: html_document
+---
+> 
+#Statistical Testing
+## Generate 1000 random numbers near the range of 0, and then test to see if they are normally distributed
+## P value is > 0.05 so the null hypothesis is not rejected
+
+```{r}
+x <- rnorm(1000, mean=0) # generate 1000 random numbers near the range of 0
+shapiro.test(x) # testing to see if they are normally distributed
+
+
+
+```
+>
+## Test whether the CO2 uptake is normally distributed. The p-value is 0.0007908 so we will reject the null hypothesis and have evidence that the CO2 uptake is not normally distributed. 
+```{r}
+data(CO2)
+
+head(CO2)
+y <- CO2[,5]
+shapiro.test(y)
+
+```
+
+> 
+# Hypothesis Testing 
+
+>
+## Determine if there has been enhancement, decline, or if the means have stayed the same under the new coach's training method. 
+
+## Results: the p value is > 0.05, which we say that the training has not made any significant improvement on the team.
+
+```{r}
+a_training = c(12.9, 13.5, 12.8, 15.6, 17.2, 19.2, 12.6, 15.3, 14.4, 11.3)
+b_training = c(12.7, 13.6, 12.0, 15.2, 16.8, 20.0, 12.0, 15.9, 16.0, 11.1)
+t.test(a_training, b_training, paired=TRUE)
+```
+>
+## Next, calculate the t-value in the 97.5th percently of a normal distribution and has a SD of 1.96, 9 is the degrees of freedom. The t-statistic also tells us that we can not reject the null hypothesis  because in order for us to be in the 97.5 the percentile for this data, meaning a right tail of 2.5% - would say that our coaches's methods improved the student's performance - we would need 2.262157 for a t-statistic, but according to our test our confidence interval only goes up to 0.48, so we are NOT outside of the expected range.
+```{r}
+qt(0.975, 9)
+```
+
+>
+## The coach implements another program- did it work this time?
+## Alt="less" is added to indicate that R needs to test the alternative hypothesis - so we are looking for a p-value higher than 0.05 - according to our test, it is - so we can that the second trainng program worked.
+```{r}
+b_training = c(12.0, 12.2, 11.2, 13.0, 15.0, 15.8, 12.2, 13.4, 12.9, 11.0)
+t.test(a_training, b_training, paired=TRUE, alt="less")
+
+```
+> # NEW DATA - A team of researchers are investing effects of a new drug XYZ. The p-value for a paired t-test is 0.2691 which means that at a 95% confidence interval, alpha is 0.05 so we can NOT reject the null hypothesis that drug XYZ has an effect on the blood pressure.
+
+
+```{r}
+trial1 <- read.csv(file="trial1.csv", stringsAsFactors=FALSE, header=TRUE, sep=",")
+
+head(trial1)
+trial1L <- t(trial1)
+
+trial1L <- as.data.frame(trial1L)
+trial1L <- trial1L[2:13,]
+
+trial1A <- as.numeric(as.character(trial1L$V1))
+trial1B <- as.numeric(as.character(trial1L$V2))
+
+t.test(trial1A, trial1B, paired=TRUE)
+
+```
+
+>
+## Trial 2 with drug ABC - We do a 2-tailed test and see that the p-value is significant (really small) which means that drug ABC DOES have an effect drug BP. If you we do another test to see if the alternate hypothesis is less than 0 (because we want the blood pressure to be less than 0) the p-value is 1 which means that we reject the alternate hypothesis and say that drug ABC lowers the blood pressure. 
+
+```{r}
+
+trial2 <- read.csv("trial2.csv", stringsAsFactors=FALSE, header=TRUE, sep=",")
+head(trial2)
+trial2L <- t(trial2)
+
+trial2L <- as.data.frame(trial2L)
+trial2L <- trial2L[2:13,]
+
+trial2A <- as.numeric(as.character(trial2L$V1))
+trial2B <- as.numeric(as.character(trial2L$V2))
+
+t.test(trial2A, trial2B, paired=TRUE)
+t.test(trial2A, trial2B, paired=TRUE, alt="less")
+
+
+```
+
+
+
